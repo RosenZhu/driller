@@ -29,6 +29,7 @@ class Driller(object):
         :param argv       : Optionally specify argv params (i,e,: ['./calc', 'parm1']),
                             defaults to binary name with no params.
         """
+        # Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker.
 
         self.binary      = binary
 
@@ -57,6 +58,8 @@ class Driller(object):
         # Set the memory limit specified in the config.
         if config.MEM_LIMIT is not None:
             resource.setrlimit(resource.RLIMIT_AS, (config.MEM_LIMIT, config.MEM_LIMIT))
+         # resource.RLIMIT_AS:
+                #The maximum area (in bytes) of address space which may be taken by the process.
 
         l.debug("[%s] drilling started on %s.", self.identifier, time.ctime(self.start_time))
 
@@ -68,6 +71,7 @@ class Driller(object):
         """
 
         # Don't re-trace the same input.
+        # redis.sismember: Returns if member is a member of the set stored at key
         if self.redis and self.redis.sismember(self.identifier + '-traced', self.input):
             return -1
 
@@ -78,6 +82,7 @@ class Driller(object):
             l.warning("Debug directory is not set. Will not log fuzzing bitmap.")
 
         # Update traced.
+        # redis.sadd: add member(s) to set
         if self.redis:
             self.redis.sadd(self.identifier + '-traced', self.input)
 
@@ -112,7 +117,9 @@ class Driller(object):
         for addr, proc in self._hooks.items():
             p.hook(addr, proc)
             l.debug("Hooking %#x -> %s...", addr, proc.display_name)
-
+            # The '#' option is only valid for integers, and only for binary, octal, or hexadecimal output. 
+            # If present, it specifies that the output will be prefixed by '0b', '0o', or '0x', respectively.
+            
         if p.loader.main_object.os == 'cgc':
             p.simos.syscall_library.update(angr.SIM_LIBRARIES['cgcabi_tracer'])
 
@@ -123,9 +130,12 @@ class Driller(object):
         s.preconstrainer.preconstrain_file(self.input, s.posix.stdin, True)
 
         simgr = p.factory.simgr(s, save_unsat=True, hierarchy=False, save_unconstrained=r.crash_mode)
-
+        
+        # An exploration technique that follows an angr path with a concrete input
         t = angr.exploration_techniques.Tracer(trace=r.trace)
+        # An exploration technique that checks for crashing
         c = angr.exploration_techniques.CrashMonitor(trace=r.trace, crash_addr=r.crash_addr)
+        # An exploration technique that symbolically follows an input looking for new state transitions.
         self._core = angr.exploration_techniques.DrillerCore(trace=r.trace)
 
         if r.crash_mode:
