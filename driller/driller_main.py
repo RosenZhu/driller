@@ -248,8 +248,8 @@ class Driller(object):
         # No redis = no catalogue.
 
     def _writeout(self, prev_addr, state):
-        generated = state.posix.stdin.load(0, state.posix.stdin.pos)
-        generated = state.se.eval(generated, cast_to=str)
+        generated = state.posix.stdin.load(0, state.posix.stdin.pos) # bitvector
+        generated = state.se.eval(generated, cast_to=str) # string
 
         key = (len(generated), prev_addr, state.addr)
 
