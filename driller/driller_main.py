@@ -127,6 +127,10 @@ class Driller(object):
         else:
             s = p.factory.full_init_state(stdin=angr.storage.file.SimFileStream)
 
+        # Preconstrain the contents of a file
+        # def preconstrain_file(self, content, simfile, set_length=False)
+        # state.posix.stdin: You can always get a state's stdin SimFile with state.posix.stdin
+        # put the value of self.input into s.posix.stdin ?
         s.preconstrainer.preconstrain_file(self.input, s.posix.stdin, True)
 
         simgr = p.factory.simgr(s, save_unsat=True, hierarchy=False, save_unconstrained=r.crash_mode)
